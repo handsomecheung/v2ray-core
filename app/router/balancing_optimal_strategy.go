@@ -122,7 +122,7 @@ func (s *OptimalStrategy) run() error {
 	})
 
 	s.tag = results[0].tag
-	newError(fmt.Sprintf("Balance OptimalStrategy now pick detour [%s](score: %.2f) from %s", results[0].tag, results[0].score, tags)).AtInfo().WriteToLog()
+	newError(fmt.Sprintf("Balance OptimalStrategy now pick detour [%s](score: %.2f) from %s", results[0].tag, results[0].score, tags)).AtWarning().WriteToLog()
 
 	return nil
 }
@@ -134,7 +134,7 @@ func (s *OptimalStrategy) testOutboud(tag string, result *optimalStrategyTestRes
 
 	oh := s.obm.GetHandler(tag)
 	if oh == nil {
-		newError("Wrong OptimalStrategy tag").AtError().WriteToLog()
+		newError("Wrong OptimalStrategy tag ", tag).AtError().WriteToLog()
 		return
 	}
 
@@ -148,7 +148,7 @@ func (s *OptimalStrategy) testOutboud(tag string, result *optimalStrategyTestRes
 		// use http response speed or time(no http content) as score
 		score := 0.0
 		if err != nil {
-			newError(err).AtError().WriteToLog()
+			newError(fmt.Sprintf("testOutboud error tag %s, error: %s", tag, err)).AtError().WriteToLog()
 		} else {
 			contentSize := 0
 			scanner := bufio.NewScanner(resp.Body)
@@ -188,7 +188,8 @@ func (s *OptimalStrategy) testOutboud(tag string, result *optimalStrategyTestRes
 	} else {
 		score = (sumScore - minScore - maxScore) / float64(s.count-2)
 	}
-	newError(fmt.Sprintf("Balance OptimalStrategy get %s's score: %.2f", tag, score)).AtDebug().WriteToLog()
+	newError(fmt.Sprintf("testOutboud done tag %s, score: %.2f", tag, score)).AtWarning().WriteToLog()
+
 	result.score = score
 }
 
